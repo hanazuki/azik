@@ -1,0 +1,152 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+GODAN = [
+  %w[あ い う え お],
+  %w[ぁ ぃ ぅ ぇ ぉ],
+  %w[か き く け こ],
+  %w[が ぎ ぐ げ ご],
+  %w[さ し す せ そ],
+  %w[ざ じ ず ぜ ぞ],
+  %w[た ち つ て と],
+  %w[だ ぢ づ で ど],
+  %w[な に ぬ ね の],
+  %w[は ひ ふ へ ほ],
+  %w[ば び ぶ べ ぼ],
+  %w[ぱ ぴ ぷ ぺ ぽ],
+  %w[ま み む め も],
+  %w[や い ゆ いぇ よ],
+  %w[ゃ ぃ ゅ ぇ ょ],
+  %w[ら り る れ ろ],
+  %w[わ うぃ う うぇ を],
+]
+
+CONSONENT_MAP = {
+  '' => 'あ',
+  'l' => 'ぁ',
+  'k' => 'か',
+  'g' => 'が',
+  %w[ky kg] => 'きゃ',
+  %w[gy gg] => 'ぎゃ',
+  's' => 'さ',
+  'z' => 'ざ',
+  %w[sy sg sh x] => 'しゃ',
+  %w[zy zg j] => 'じゃ',
+  't' => 'た',
+  'd' => 'だ',
+  %w[ty tg ch c] => 'ちゃ',
+  %w[dy dg] => 'ぢゃ',
+  'th' => 'てゃ',
+  'dh' => 'でゃ',
+  'ts' => 'つぁ',
+  'tw' => 'とぁ',
+  'n' => 'な',
+  %w[ny ng] => 'にゃ',
+  'h' => 'は',
+  'b' => 'ば',
+  %w[by bg] => 'びゃ',
+  'p' => 'ぱ',
+  %w[py pg] => 'ぴゃ',
+  'f' => 'ふぁ',
+  %w[fy fg] => 'ふゃ',
+  'v' => 'ゔぁ',
+  %w[vy vg] => 'ゔゃ',
+  'm' => 'ま',
+  %w[my mg] => 'みゃ',
+  'y' => 'や',
+  'ly' => 'ゃ',
+  'r' => 'ら',
+  %w[ry rg] => 'りゃ',
+  'w' => 'わ',
+  'wh' => 'うぁ',
+}
+
+EXCEPTION_MAP = {
+  'shi' => 'し',
+  'xi' => 'し',
+  'ji' => 'じ',
+  'chi' => 'ち',
+  'ci' => 'ち',
+  'fu' => 'ふ',
+  'tsu' => 'つ',
+  'vu' => 'ゔ',
+  'whu' => 'う',
+  'wyi' => 'ゐ',
+  'wyk' => 'ゐん',
+  'wye' => 'ゑ',
+  'wyd' => 'ゑん',
+  'wyw' => 'ゑい',
+  'nn' => 'ん',
+  'q' => 'ん',
+  '-' => 'ー',
+  '~' => '〜',
+  '.' => '。',
+  ',' => '、',
+  '[' => '「',
+  ']' => '」',
+  ';' => 'っ',
+  ':' => 'ー',
+  'z/' => '・',
+  'z.' => '…',
+  'z,' => '‥',
+  'z-' => '〜',
+  'z[' => '『',
+  'z]' => '』',
+  'z;' => '；',
+  'z:' => '：',
+}
+
+VOWELS = %w[a i u e o]
+
+COMPOUND_VOWELS_MAP = {
+  'z' => 'aん',
+  'k' => 'iん',
+  'j' => 'uん',
+  'd' => 'eん',
+  'l' => 'oん',
+  'q' => 'aい',
+  'h' => 'uう',
+  'w' => 'eい',
+  'p' => 'oう',
+}
+
+def change_vowel(base, vowel)
+  head, tail = base[0..-2], base[-1..-1]
+  if i = VOWELS.index(vowel)
+    tail = GODAN.find{|row| row[0] == tail}[i]
+    head + tail if tail != '-'
+  end
+end
+
+map = {}
+def map.set(k, v)
+  if u = self[k]
+    fail "Conflict on #{k}: #{u}, #{v}"
+  end
+  store(k, v)
+end
+
+CONSONENT_MAP.each do |cc, base|
+  [*cc].each do |c|
+    VOWELS.each do |v|
+      if w = change_vowel(base, v)
+        map.set(c + v, w)
+      end
+    end
+
+    unless c.empty? || c == 'l'
+      COMPOUND_VOWELS_MAP.each do |k, v|
+        head, tail = v[0], v[1..-1]
+        if w = change_vowel(base, head)
+          map.set(c + k, w + tail)
+        end
+      end
+    end
+  end
+end
+
+map.update(EXCEPTION_MAP)
+
+map.each do |rom, kana|
+  puts [rom, kana].join(?\t)
+end
