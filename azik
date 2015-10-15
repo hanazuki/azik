@@ -71,7 +71,7 @@ SMALL_MAP = {
   'わ' => 'ゎ',
 }
 
-EXCEPTION_MAP = {
+IRREGULAR_MAP = {
   'xi' => 'し',
   'ji' => 'じ',
   'ci' => 'ち',
@@ -138,7 +138,7 @@ end
 CONSONENT_MAP.each do |cc, base|
   [*cc].each do |c|
     VOWELS.each do |v|
-      if w = EXCEPTION_MAP[c + v] || change_vowel(base, v)
+      if w = IRREGULAR_MAP[c + v] || change_vowel(base, v)
         map.set(c + v, w)
         map.set('l' + c + v, w) if w = SMALL_MAP[w]
       end
@@ -147,7 +147,7 @@ CONSONENT_MAP.each do |cc, base|
     unless c.empty?
       COMPOUND_VOWELS_MAP.each do |k, v|
         head, tail = v[0], v[1..-1]
-        if w = (EXCEPTION_MAP[c + head] || change_vowel(base, head)) + tail
+        if w = (IRREGULAR_MAP[c + head] || change_vowel(base, head)) + tail
           map.set(c + k, w)
         end
       end
@@ -155,7 +155,7 @@ CONSONENT_MAP.each do |cc, base|
   end
 end
 
-EXCEPTION_MAP.each do |k, w|
+IRREGULAR_MAP.each do |k, w|
   unless map[k]
     map.set(k, w)
 
