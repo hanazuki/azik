@@ -23,7 +23,6 @@ GODAN = [
 
 CONSONENT_MAP = {
   '' => 'あ',
-  'l' => 'ぁ',
   'k' => 'か',
   'g' => 'が',
   %w[ky kg] => 'きゃ',
@@ -52,10 +51,24 @@ CONSONENT_MAP = {
   'm' => 'ま',
   %w[my mg] => 'みゃ',
   'y' => 'や',
-  'ly' => 'ゃ',
   'r' => 'ら',
   %w[ry rg] => 'りゃ',
   'w' => 'わ',
+}
+
+SMALL_MAP = {
+  'あ' => 'ぁ',
+  'い' => 'ぃ',
+  'う' => 'ぅ',
+  'え' => 'ぇ',
+  'お' => 'ぉ',
+  'か' => 'ゕ',
+  'け' => 'ゖ',
+  'つ' => 'っ',
+  'や' => 'ゃ',
+  'ゆ' => 'ゅ',
+  'よ' => 'ょ',
+  'わ' => 'ゎ',
 }
 
 EXCEPTION_MAP = {
@@ -65,7 +78,9 @@ EXCEPTION_MAP = {
   'fu' => 'ふ',
   'tsu' => 'つ',
   'vu' => 'ゔ',
-  'whu' => 'う',
+}
+
+STATIC_MAP = {
   'wyi' => 'ゐ',
   'wyk' => 'ゐん',
   'wye' => 'ゑ',
@@ -125,23 +140,24 @@ end
 CONSONENT_MAP.each do |cc, base|
   [*cc].each do |c|
     VOWELS.each do |v|
-      if w = change_vowel(base, v)
+      if w = EXCEPTION_MAP[c + v] || change_vowel(base, v)
         map.set(c + v, w)
+        map.set('l' + c + v, w) if w = SMALL_MAP[w]
       end
     end
 
-    unless c.empty? || c == 'l'
+    unless c.empty?
       COMPOUND_VOWELS_MAP.each do |k, v|
         head, tail = v[0], v[1..-1]
-        if w = change_vowel(base, head)
-          map.set(c + k, w + tail)
+        if w = (EXCEPTION_MAP[c + head] || change_vowel(base, head)) + tail
+          map.set(c + k, w)
         end
       end
     end
   end
 end
 
-map.update(EXCEPTION_MAP)
+map.update(STATIC_MAP)
 
 map.each do |rom, kana|
   puts [rom, kana].join(?\t)
