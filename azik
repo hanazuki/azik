@@ -112,6 +112,7 @@ VOWELS = %w[a i u e o]
 
 COMPOUND_VOWELS_MAP = {
   'z' => 'aん',
+  'n' => 'aん',
   'k' => 'iん',
   'j' => 'uん',
   'd' => 'eん',
