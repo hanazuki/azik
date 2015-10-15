@@ -78,14 +78,12 @@ EXCEPTION_MAP = {
   'fu' => 'ふ',
   'tsu' => 'つ',
   'vu' => 'ゔ',
+
+  'wyi' => 'ゐ',
+  'wye' => 'ゑ',
 }
 
 STATIC_MAP = {
-  'wyi' => 'ゐ',
-  'wyk' => 'ゐん',
-  'wye' => 'ゑ',
-  'wyd' => 'ゑん',
-  'wyw' => 'ゑい',
   'nn' => 'ん',
   'n' => 'ん',
   'q' => 'ん',
@@ -152,6 +150,19 @@ CONSONENT_MAP.each do |cc, base|
         if w = (EXCEPTION_MAP[c + head] || change_vowel(base, head)) + tail
           map.set(c + k, w)
         end
+      end
+    end
+  end
+end
+
+EXCEPTION_MAP.each do |k, w|
+  unless map[k]
+    map.set(k, w)
+
+    c, v = k[0..-2], k[-1..-1]
+    COMPOUND_VOWELS_MAP.each do |cv, cw|
+      if cw.chr == v
+        map.set(c + cv, w + cw[1..-1])
       end
     end
   end
